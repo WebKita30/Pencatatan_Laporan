@@ -14,119 +14,124 @@
         font-family: "Segoe UI", sans-serif;
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         margin: 0;
-        padding: 20px;
+        padding: 10px;
       }
+
       .container {
-        max-width: 1200px;
+        max-width: 1000px;
         margin: auto;
         background: #fff;
-        padding: 20px;
+        padding: 15px;
         border-radius: 16px;
       }
+
       h1,
       h2 {
         text-align: center;
         color: #1e3c72;
+        font-size: 1.5rem;
       }
 
-      /* dashboard */
+      /* Dashboard cards */
       .dashboard {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
       }
       .card {
         background: linear-gradient(135deg, #0c7c59, #16a085);
         color: #fff;
-        padding: 15px;
+        padding: 10px;
         border-radius: 14px;
         text-align: center;
+        font-size: 0.9rem;
       }
       .card span {
-        font-size: 24px;
+        font-size: 1.1rem;
         font-weight: 700;
         display: block;
         margin-top: 5px;
       }
 
-      /* form */
+      /* Form input */
       .form {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
-        margin-top: 20px;
+        margin-top: 15px;
       }
-      input,
-      select,
-      button {
+      .form input,
+      .form select,
+      .form button {
         padding: 10px;
         border-radius: 8px;
         border: 1px solid #ccc;
-        width: 100%;
+        flex: 1 1 100%;
         box-sizing: border-box;
       }
-      button {
-        cursor: pointer;
-      }
-      .btn-add {
+      .form button {
         background: #1e3c72;
         color: #fff;
-      }
-      .btn-del {
-        background: #e74c3c;
-        color: #fff;
-      }
-      .btn-pdf {
-        background: #0c7c59;
-        color: #fff;
-        width: 100%;
-        margin-top: 15px;
+        cursor: pointer;
       }
 
-      /* table */
+      /* Table */
+      .table-wrapper {
+        overflow-x: auto;
+        margin-top: 15px;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
+        min-width: 600px;
       }
       th {
         background: #1e3c72;
         color: #fff;
-        padding: 10px;
-        font-size: 14px;
+        padding: 8px;
+        font-size: 0.8rem;
       }
       td {
-        padding: 8px;
-        border-bottom: 1px solid #eee;
-        font-size: 14px;
+        padding: 6px;
+        font-size: 0.8rem;
         text-align: center;
-        word-break: break-word;
+        border-bottom: 1px solid #eee;
+      }
+      .btn-del {
+        background: #e74c3c;
+        color: #fff;
+        padding: 4px 6px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
       }
 
-      /* summary */
+      /* Summary */
       .summary {
-        margin-top: 20px;
+        margin-top: 15px;
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         color: #fff;
-        padding: 15px;
+        padding: 10px;
         border-radius: 12px;
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
+        font-size: 0.9rem;
       }
       .summary span {
-        font-size: 22px;
         font-weight: 700;
       }
 
-      /* motivasi */
+      /* Motivasi */
       .motivasi {
-        margin-top: 15px;
-        padding: 14px;
-        border-radius: 10px;
+        margin-top: 10px;
+        padding: 10px;
+        border-radius: 8px;
         font-weight: 600;
         text-align: center;
         display: none;
+        font-size: 0.8rem;
       }
       .motivasi.sukses {
         background: #e8fff4;
@@ -139,24 +144,46 @@
         border: 2px solid #c0392b;
       }
 
+      /* Canvas charts */
       canvas {
-        margin-top: 20px;
+        margin-top: 15px;
         width: 100% !important;
         height: auto !important;
       }
 
-      /* responsive */
-      @media (max-width: 768px) {
+      /* PDF button */
+      .btn-pdf {
+        background: #0c7c59;
+        color: #fff;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        h1,
+        h2 {
+          font-size: 1.2rem;
+        }
         th,
         td {
-          font-size: 12px;
-          padding: 6px;
+          font-size: 0.7rem;
+          padding: 4px;
         }
         .card span {
-          font-size: 20px;
+          font-size: 1rem;
         }
-        .summary span {
-          font-size: 18px;
+        .summary {
+          font-size: 0.8rem;
+        }
+        .form input,
+        .form select,
+        .form button {
+          padding: 8px;
         }
       }
     </style>
@@ -198,20 +225,22 @@
         <button class="btn-add" onclick="tambah()">Tambah</button>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Tanggal</th>
-            <th>Nama</th>
-            <th>Ukuran</th>
-            <th>Harga</th>
-            <th>Jumlah</th>
-            <th>Total</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tabel"></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Nama</th>
+              <th>Ukuran</th>
+              <th>Harga</th>
+              <th>Jumlah</th>
+              <th>Total</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabel"></tbody>
+        </table>
+      </div>
 
       <div class="summary">
         <h3>Total Keseluruhan</h3>
@@ -270,19 +299,16 @@
         const t = h * Number(hasil.value);
         const now = new Date();
         const tanggal = now.toISOString().slice(0, 10);
-
         data.push({
           nama: nama.value,
-          tanggal: tanggal,
+          tanggal,
           ukuran: ukuran.value,
           harga: h,
           hasil: Number(hasil.value),
           total: t,
         });
-
         localStorage.setItem("borongan", JSON.stringify(data));
         render();
-
         nama.value = "";
         ukuran.value = "";
         hasil.value = "";
@@ -306,18 +332,17 @@
           gt += d.total;
           if (d.tanggal === today) hari += d.total;
           if (d.tanggal.slice(0, 7) === bln) bulan += d.total;
-
           tabel.innerHTML += `
-      <tr>
-        <td>${hariTanggal(d.tanggal)}</td>
-        <td>${d.nama}</td>
-        <td>${d.ukuran}</td>
-        <td>${rupiah(d.harga)}</td>
-        <td>${d.hasil}</td>
-        <td>${rupiah(d.total)}</td>
-        <td><button class="btn-del" onclick="hapus(${i})">Hapus</button></td>
-      </tr>
-    `;
+          <tr>
+            <td>${hariTanggal(d.tanggal)}</td>
+            <td>${d.nama}</td>
+            <td>${d.ukuran}</td>
+            <td>${rupiah(d.harga)}</td>
+            <td>${d.hasil}</td>
+            <td>${rupiah(d.total)}</td>
+            <td><button class="btn-del" onclick="hapus(${i})">Hapus</button></td>
+          </tr>
+        `;
         });
 
         grand.innerText = dTotal.innerText = rupiah(gt);
@@ -353,6 +378,7 @@
             ],
           },
         });
+
         chBulanan = new Chart(grafikBulanan, {
           type: "line",
           data: {
@@ -410,7 +436,6 @@
         }
       }
 
-      /* PDF */
       async function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
