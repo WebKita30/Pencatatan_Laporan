@@ -5,24 +5,22 @@
     <title>Dashboard Kerja Borongan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
       body {
-        font-family:
-          Segoe UI,
-          sans-serif;
+        font-family: "Segoe UI", sans-serif;
         background: linear-gradient(135deg, #1e3c72, #2a5298);
+        margin: 0;
         padding: 20px;
       }
       .container {
         max-width: 1200px;
         margin: auto;
         background: #fff;
-        padding: 25px;
+        padding: 20px;
         border-radius: 16px;
       }
       h1,
@@ -34,25 +32,28 @@
       /* dashboard */
       .dashboard {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 15px;
       }
       .card {
         background: linear-gradient(135deg, #0c7c59, #16a085);
         color: #fff;
-        padding: 18px;
+        padding: 15px;
         border-radius: 14px;
+        text-align: center;
       }
       .card span {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 700;
+        display: block;
+        margin-top: 5px;
       }
 
       /* form */
       .form {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
         margin-top: 20px;
       }
       input,
@@ -61,6 +62,8 @@
         padding: 10px;
         border-radius: 8px;
         border: 1px solid #ccc;
+        width: 100%;
+        box-sizing: border-box;
       }
       button {
         cursor: pointer;
@@ -77,7 +80,7 @@
         background: #0c7c59;
         color: #fff;
         width: 100%;
-        margin-top: 20px;
+        margin-top: 15px;
       }
 
       /* table */
@@ -90,11 +93,14 @@
         background: #1e3c72;
         color: #fff;
         padding: 10px;
+        font-size: 14px;
       }
       td {
         padding: 8px;
         border-bottom: 1px solid #eee;
+        font-size: 14px;
         text-align: center;
+        word-break: break-word;
       }
 
       /* summary */
@@ -106,9 +112,10 @@
         border-radius: 12px;
         display: flex;
         justify-content: space-between;
+        flex-wrap: wrap;
       }
       .summary span {
-        font-size: 26px;
+        font-size: 22px;
         font-weight: 700;
       }
 
@@ -134,12 +141,27 @@
 
       canvas {
         margin-top: 20px;
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      /* responsive */
+      @media (max-width: 768px) {
+        th,
+        td {
+          font-size: 12px;
+          padding: 6px;
+        }
+        .card span {
+          font-size: 20px;
+        }
+        .summary span {
+          font-size: 18px;
+        }
       }
     </style>
   </head>
-
   <body>
-    <!-- AREA PDF -->
     <div class="container" id="areaPDF">
       <h1>📊 Dashboard Kerja Borongan</h1>
 
@@ -162,9 +184,8 @@
         </div>
       </div>
 
-      <div class="form">
+      <div class="form" id="formInput">
         <input id="nama" placeholder="Nama" />
-        <input type="date" id="tanggal" />
         <select id="ukuran">
           <option value="">Ukuran</option>
           <option data-harga="10.5">45–54 cm</option>
@@ -173,9 +194,7 @@
           <option data-harga="13.6">75–84 cm</option>
           <option data-harga="17">85–94 cm</option>
         </select>
-        <input id="harga" readonly placeholder="Harga" />
         <input type="number" id="hasil" placeholder="Jumlah" />
-        <input id="total" readonly placeholder="Total" />
         <button class="btn-add" onclick="tambah()">Tambah</button>
       </div>
 
@@ -214,40 +233,59 @@
       let chHarian, chBulanan;
       const rupiah = (n) => "Rp " + Number(n).toLocaleString("id-ID");
 
-      ukuran.onchange = () => {
-        const h = ukuran.options[ukuran.selectedIndex]?.dataset.harga || 0;
-        harga.value = rupiah(h);
-        hitung();
-      };
-      hasil.oninput = hitung;
-
-      function hitung() {
-        const h = ukuran.options[ukuran.selectedIndex]?.dataset.harga || 0;
-        total.value = rupiah(h * hasil.value);
+      function hariTanggal(date) {
+        const hari = [
+          "Minggu",
+          "Senin",
+          "Selasa",
+          "Rabu",
+          "Kamis",
+          "Jumat",
+          "Sabtu",
+        ];
+        const bulan = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "Mei",
+          "Jun",
+          "Jul",
+          "Agu",
+          "Sep",
+          "Okt",
+          "Nov",
+          "Des",
+        ];
+        const d = new Date(date);
+        return `${hari[d.getDay()]}, ${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
       }
 
       function tambah() {
-        if (!nama.value || !tanggal.value || !ukuran.value || !hasil.value) {
+        if (!nama.value || !ukuran.value || !hasil.value) {
           alert("Lengkapi data");
           return;
         }
         const h = Number(ukuran.options[ukuran.selectedIndex].dataset.harga);
-        const t = h * hasil.value;
+        const t = h * Number(hasil.value);
+        const now = new Date();
+        const tanggal = now.toISOString().slice(0, 10);
 
         data.push({
           nama: nama.value,
-          tanggal: tanggal.value,
-          bulan: tanggal.value.slice(0, 7),
+          tanggal: tanggal,
           ukuran: ukuran.value,
           harga: h,
-          hasil: hasil.value,
+          hasil: Number(hasil.value),
           total: t,
         });
 
         localStorage.setItem("borongan", JSON.stringify(data));
         render();
-        document.querySelectorAll("input").forEach((i) => (i.value = ""));
+
+        nama.value = "";
         ukuran.value = "";
+        hasil.value = "";
       }
 
       function hapus(i) {
@@ -267,22 +305,22 @@
         data.forEach((d, i) => {
           gt += d.total;
           if (d.tanggal === today) hari += d.total;
-          if (d.bulan === bln) bulan += d.total;
+          if (d.tanggal.slice(0, 7) === bln) bulan += d.total;
 
           tabel.innerHTML += `
-    <tr>
-      <td>${d.tanggal}</td>
-      <td>${d.nama}</td>
-      <td>${d.ukuran}</td>
-      <td>${rupiah(d.harga)}</td>
-      <td>${d.hasil}</td>
-      <td>${rupiah(d.total)}</td>
-      <td><button class="btn-del" onclick="hapus(${i})">Hapus</button></td>
-    </tr>`;
+      <tr>
+        <td>${hariTanggal(d.tanggal)}</td>
+        <td>${d.nama}</td>
+        <td>${d.ukuran}</td>
+        <td>${rupiah(d.harga)}</td>
+        <td>${d.hasil}</td>
+        <td>${rupiah(d.total)}</td>
+        <td><button class="btn-del" onclick="hapus(${i})">Hapus</button></td>
+      </tr>
+    `;
         });
 
-        grand.innerText = rupiah(gt);
-        dTotal.innerText = rupiah(gt);
+        grand.innerText = dTotal.innerText = rupiah(gt);
         dHari.innerText = rupiah(hari);
         dBulan.innerText = rupiah(bulan);
         dData.innerText = data.length;
@@ -296,7 +334,7 @@
           b = {};
         data.forEach((d) => {
           h[d.tanggal] = (h[d.tanggal] || 0) + d.total;
-          b[d.bulan] = (b[d.bulan] || 0) + d.total;
+          b[d.tanggal.slice(0, 7)] = (b[d.tanggal.slice(0, 7)] || 0) + d.total;
         });
 
         if (chHarian) chHarian.destroy();
@@ -305,7 +343,7 @@
         chHarian = new Chart(grafikHarian, {
           type: "bar",
           data: {
-            labels: Object.keys(h),
+            labels: Object.keys(h).map((d) => hariTanggal(d)),
             datasets: [
               {
                 label: "Harian",
@@ -315,7 +353,6 @@
             ],
           },
         });
-
         chBulanan = new Chart(grafikBulanan, {
           type: "line",
           data: {
@@ -333,77 +370,57 @@
         });
       }
 
-      /* ===== MOTIVASI ===== */
       function cekMotivasi() {
-        cekHarian();
-        cekBulanan();
-      }
+        const mapH = {},
+          mapB = {};
+        data.forEach((d) => {
+          mapH[d.tanggal] = (mapH[d.tanggal] || 0) + d.total;
+          mapB[d.tanggal.slice(0, 7)] =
+            (mapB[d.tanggal.slice(0, 7)] || 0) + d.total;
+        });
 
-      function cekHarian() {
-        const map = {};
-        data.forEach((d) => (map[d.tanggal] = (map[d.tanggal] || 0) + d.total));
-        const k = Object.keys(map).sort();
-        if (k.length < 2) return;
+        const kH = Object.keys(mapH).sort();
+        if (kH.length >= 2) {
+          const el = document.getElementById("motivasiHarian");
+          el.style.display = "block";
+          if (mapH[kH.at(-1)] > mapH[kH.at(-2)]) {
+            el.className = "motivasi sukses";
+            el.innerHTML =
+              "🔥 Kinerja harian meningkat! Pertahankan semangat kerja 💪";
+          } else {
+            el.className = "motivasi warning";
+            el.innerHTML =
+              "⚠️ Kinerja harian menurun. Evaluasi dan bangkit besok 💪";
+          }
+        }
 
-        const el = document.getElementById("motivasiHarian");
-        el.style.display = "block";
-
-        if (map[k.at(-1)] > map[k.at(-2)]) {
-          el.className = "motivasi sukses";
-          el.innerHTML =
-            "🔥 Kinerja harian meningkat! Pertahankan semangat kerja 💪";
-        } else {
-          el.className = "motivasi warning";
-          el.innerHTML =
-            "⚠️ Kinerja harian menurun. Evaluasi dan bangkit besok 💪";
+        const kB = Object.keys(mapB).sort();
+        if (kB.length >= 2) {
+          const el = document.getElementById("motivasiBulanan");
+          el.style.display = "block";
+          if (mapB[kB.at(-1)] > mapB[kB.at(-2)]) {
+            el.className = "motivasi sukses";
+            el.innerHTML =
+              "🏆 Bulan ini lebih baik dari bulan lalu! Kerja kerasmu terbukti 👏";
+          } else {
+            el.className = "motivasi warning";
+            el.innerHTML =
+              "⚠️ Pendapatan bulanan menurun. Tetapkan target baru 🚀";
+          }
         }
       }
 
-      function cekBulanan() {
-        const map = {};
-        data.forEach((d) => (map[d.bulan] = (map[d.bulan] || 0) + d.total));
-        const k = Object.keys(map).sort();
-        if (k.length < 2) return;
-
-        const el = document.getElementById("motivasiBulanan");
-        el.style.display = "block";
-
-        if (map[k.at(-1)] > map[k.at(-2)]) {
-          el.className = "motivasi sukses";
-          el.innerHTML =
-            "🏆 Bulan ini lebih baik dari bulan lalu! Kerja kerasmu terbukti 👏";
-        } else {
-          el.className = "motivasi warning";
-          el.innerHTML =
-            "⚠️ Pendapatan bulanan menurun. Tetapkan target baru 🚀";
-        }
-      }
-
-      /* ===== PDF ===== */
+      /* PDF */
       async function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
-
         const canvas = await html2canvas(document.getElementById("areaPDF"), {
           scale: 2,
         });
         const img = canvas.toDataURL("image/png");
-
-        const w = 210;
-        const h = (canvas.height * w) / canvas.width;
-        let y = 0,
-          sisa = h;
-
-        pdf.addImage(img, "PNG", 0, y, w, h);
-        sisa -= 297;
-
-        while (sisa > 0) {
-          y -= 297;
-          pdf.addPage();
-          pdf.addImage(img, "PNG", 0, y, w, h);
-          sisa -= 297;
-        }
-
+        const w = 210,
+          h = (canvas.height * w) / canvas.width;
+        pdf.addImage(img, "PNG", 0, 0, w, h);
         pdf.save("Laporan_Kerja_Borongan.pdf");
       }
 
