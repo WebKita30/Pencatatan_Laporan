@@ -5,6 +5,7 @@
     <title>Dashboard Kerja Borongan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -12,46 +13,22 @@
     <style>
       body {
         font-family: "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        background: #f5f5f5;
         margin: 0;
-        padding: 10px;
+        padding: 20px;
       }
 
       .container {
         max-width: 1000px;
         margin: auto;
         background: #fff;
-        padding: 15px;
-        border-radius: 16px;
+        padding: 20px;
+        border-radius: 12px;
       }
 
-      h1,
-      h2 {
+      h1 {
         text-align: center;
         color: #1e3c72;
-        font-size: 1.5rem;
-      }
-
-      /* Dashboard cards */
-      .dashboard {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
-      }
-      .card {
-        background: linear-gradient(135deg, #0c7c59, #16a085);
-        color: #fff;
-        padding: 10px;
-        border-radius: 14px;
-        text-align: center;
-        font-size: 0.9rem;
-      }
-      .card span {
-        font-size: 1.1rem;
-        font-weight: 700;
-        display: block;
-        margin-top: 5px;
       }
 
       /* Form input */
@@ -79,7 +56,7 @@
       /* Table */
       .table-wrapper {
         overflow-x: auto;
-        margin-top: 15px;
+        margin-top: 20px;
       }
       table {
         width: 100%;
@@ -90,13 +67,18 @@
         background: #1e3c72;
         color: #fff;
         padding: 8px;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        text-align: center;
       }
       td {
         padding: 6px;
         font-size: 0.8rem;
         text-align: center;
         border-bottom: 1px solid #eee;
+      }
+      tfoot td {
+        font-weight: 600;
+        background: #f0f0f0;
       }
       .btn-del {
         background: #e74c3c;
@@ -107,51 +89,25 @@
         cursor: pointer;
       }
 
-      /* Summary */
-      .summary {
-        margin-top: 15px;
-        background: linear-gradient(135deg, #1e3c72, #2a5298);
-        color: #fff;
-        padding: 10px;
-        border-radius: 12px;
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        font-size: 0.9rem;
-      }
-      .summary span {
-        font-weight: 700;
-      }
-
       /* Motivasi */
-      .motivasi {
-        margin-top: 10px;
-        padding: 10px;
-        border-radius: 8px;
+      .motivasiPDF {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 6px;
         font-weight: 600;
         text-align: center;
-        display: none;
-        font-size: 0.8rem;
       }
-      .motivasi.sukses {
+      .motivasiPDF.sukses {
         background: #e8fff4;
         color: #0c7c59;
         border: 2px solid #0c7c59;
       }
-      .motivasi.warning {
+      .motivasiPDF.warning {
         background: #fff0f0;
         color: #c0392b;
         border: 2px solid #c0392b;
       }
 
-      /* Canvas charts */
-      canvas {
-        margin-top: 15px;
-        width: 100% !important;
-        height: auto !important;
-      }
-
-      /* PDF button */
       .btn-pdf {
         background: #0c7c59;
         color: #fff;
@@ -159,59 +115,25 @@
         padding: 10px;
         border: none;
         border-radius: 8px;
-        margin-top: 10px;
+        margin-top: 15px;
         cursor: pointer;
       }
 
-      /* Responsive */
-      @media (max-width: 600px) {
-        h1,
-        h2 {
-          font-size: 1.2rem;
-        }
-        th,
-        td {
-          font-size: 0.7rem;
-          padding: 4px;
-        }
-        .card span {
-          font-size: 1rem;
-        }
-        .summary {
-          font-size: 0.8rem;
-        }
-        .form input,
-        .form select,
-        .form button {
-          padding: 8px;
-        }
+      /* Grafik */
+      #chartContainer {
+        margin-top: 25px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 12px;
       }
     </style>
   </head>
   <body>
-    <div class="container" id="areaPDF">
+    <div class="container">
       <h1>📊 Dashboard Kerja Borongan</h1>
 
-      <div class="dashboard">
-        <div class="card">
-          <h4>Total Pendapatan</h4>
-          <span id="dTotal">Rp 0</span>
-        </div>
-        <div class="card">
-          <h4>Hari Ini</h4>
-          <span id="dHari">Rp 0</span>
-        </div>
-        <div class="card">
-          <h4>Bulan Ini</h4>
-          <span id="dBulan">Rp 0</span>
-        </div>
-        <div class="card">
-          <h4>Total Data</h4>
-          <span id="dData">0</span>
-        </div>
-      </div>
-
-      <div class="form" id="formInput">
+      <!-- Form input -->
+      <div class="form">
         <input id="nama" placeholder="Nama" />
         <select id="ukuran">
           <option value="">Ukuran</option>
@@ -225,7 +147,11 @@
         <button class="btn-add" onclick="tambah()">Tambah</button>
       </div>
 
-      <div class="table-wrapper">
+      <!-- Motivasi -->
+      <div id="motivasiPDF" class="motivasiPDF"></div>
+
+      <!-- Tabel -->
+      <div class="table-wrapper" id="areaTable">
         <table>
           <thead>
             <tr>
@@ -239,27 +165,28 @@
             </tr>
           </thead>
           <tbody id="tabel"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">Total Keseluruhan</td>
+              <td id="totalKeseluruhan">Rp 0</td>
+              <td></td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
-      <div class="summary">
-        <h3>Total Keseluruhan</h3>
-        <span id="grand">Rp 0</span>
+      <!-- Tombol PDF -->
+      <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF</button>
+
+      <!-- Grafik -->
+      <div id="chartContainer">
+        <canvas id="chart"></canvas>
       </div>
-
-      <div id="motivasiHarian" class="motivasi"></div>
-      <div id="motivasiBulanan" class="motivasi"></div>
-
-      <h2>📈 Grafik Pendapatan</h2>
-      <canvas id="grafikHarian"></canvas>
-      <canvas id="grafikBulanan"></canvas>
     </div>
-
-    <button class="btn-pdf" onclick="downloadPDF()">📥 Download PDF</button>
 
     <script>
       let data = JSON.parse(localStorage.getItem("borongan")) || [];
-      let chHarian, chBulanan;
+
       const rupiah = (n) => "Rp " + Number(n).toLocaleString("id-ID");
 
       function hariTanggal(date) {
@@ -321,17 +248,11 @@
       }
 
       function render() {
+        // Render tabel
         tabel.innerHTML = "";
-        let gt = 0,
-          hari = 0,
-          bulan = 0;
-        const today = new Date().toISOString().slice(0, 10);
-        const bln = today.slice(0, 7);
-
+        let totalKeseluruhan = 0;
         data.forEach((d, i) => {
-          gt += d.total;
-          if (d.tanggal === today) hari += d.total;
-          if (d.tanggal.slice(0, 7) === bln) bulan += d.total;
+          totalKeseluruhan += d.total;
           tabel.innerHTML += `
           <tr>
             <td>${hariTanggal(d.tanggal)}</td>
@@ -344,109 +265,115 @@
           </tr>
         `;
         });
+        document.getElementById("totalKeseluruhan").innerText =
+          rupiah(totalKeseluruhan);
 
-        grand.innerText = dTotal.innerText = rupiah(gt);
-        dHari.innerText = rupiah(hari);
-        dBulan.innerText = rupiah(bulan);
-        dData.innerText = data.length;
+        // Motivasi harian & bulanan
+        cekMotivasiPDF();
 
-        grafik();
-        cekMotivasi();
+        // Grafik
+        renderChart();
       }
 
-      function grafik() {
-        const h = {},
-          b = {};
+      function cekMotivasiPDF() {
+        const el = document.getElementById("motivasiPDF");
+
+        // Kinerja harian
+        const mapH = {};
+        data.forEach(
+          (d) => (mapH[d.tanggal] = (mapH[d.tanggal] || 0) + d.total),
+        );
+        const hariKeys = Object.keys(mapH).sort();
+
+        // Kinerja bulanan
+        const mapM = {};
         data.forEach((d) => {
-          h[d.tanggal] = (h[d.tanggal] || 0) + d.total;
-          b[d.tanggal.slice(0, 7)] = (b[d.tanggal.slice(0, 7)] || 0) + d.total;
+          const m = d.tanggal.slice(0, 7);
+          mapM[m] = (mapM[m] || 0) + d.total;
         });
+        const bulanKeys = Object.keys(mapM).sort();
 
-        if (chHarian) chHarian.destroy();
-        if (chBulanan) chBulanan.destroy();
+        let motivasiText = "";
+        let className = "";
 
-        chHarian = new Chart(grafikHarian, {
+        // Harian
+        if (hariKeys.length >= 2) {
+          if (mapH[hariKeys.at(-1)] > mapH[hariKeys.at(-2)])
+            motivasiText += "🔥 Kinerja harian meningkat! ";
+          else motivasiText += "⚠️ Kinerja harian menurun. ";
+        }
+
+        // Bulanan
+        if (bulanKeys.length >= 2) {
+          if (mapM[bulanKeys.at(-1)] > mapM[bulanKeys.at(-2)]) {
+            motivasiText += "🚀 Kinerja bulanan meningkat! ";
+            motivasiText +=
+              "Tetap hati-hati istirahat lah sebentar semangat, jangan sampai ngantuk atau kelelahan karena semangat kerja Kesehatan badan Lebih Penting Dari Segalanya. 💪"; // tambahan
+            className = "sukses";
+          } else {
+            motivasiText += "📉 Kinerja bulanan menurun!";
+            className = "warning";
+          }
+        }
+
+        if (motivasiText) {
+          el.className = "motivasiPDF " + className;
+          el.innerHTML = motivasiText;
+          el.style.display = "block";
+        } else el.style.display = "none";
+      }
+
+      function renderChart() {
+        const ctx = document.getElementById("chart").getContext("2d");
+        const map = {};
+        data.forEach((d) => (map[d.tanggal] = (map[d.tanggal] || 0) + d.total));
+        const labels = Object.keys(map).sort();
+        const values = labels.map((k) => map[k]);
+
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
           type: "bar",
           data: {
-            labels: Object.keys(h).map((d) => hariTanggal(d)),
+            labels,
             datasets: [
               {
-                label: "Harian",
-                data: Object.values(h),
+                label: "Total Harian",
+                data: values,
                 backgroundColor: "#1e3c72",
               },
             ],
           },
-        });
-
-        chBulanan = new Chart(grafikBulanan, {
-          type: "line",
-          data: {
-            labels: Object.keys(b),
-            datasets: [
-              {
-                label: "Bulanan",
-                data: Object.values(b),
-                borderColor: "#0c7c59",
-                fill: true,
-                tension: 0.4,
-              },
-            ],
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } },
           },
         });
       }
 
-      function cekMotivasi() {
-        const mapH = {},
-          mapB = {};
-        data.forEach((d) => {
-          mapH[d.tanggal] = (mapH[d.tanggal] || 0) + d.total;
-          mapB[d.tanggal.slice(0, 7)] =
-            (mapB[d.tanggal.slice(0, 7)] || 0) + d.total;
-        });
-
-        const kH = Object.keys(mapH).sort();
-        if (kH.length >= 2) {
-          const el = document.getElementById("motivasiHarian");
-          el.style.display = "block";
-          if (mapH[kH.at(-1)] > mapH[kH.at(-2)]) {
-            el.className = "motivasi sukses";
-            el.innerHTML =
-              "🔥 Kinerja harian meningkat! Pertahankan semangat kerja 💪";
-          } else {
-            el.className = "motivasi warning";
-            el.innerHTML =
-              "⚠️ Kinerja harian menurun. Evaluasi dan bangkit besok 💪";
-          }
-        }
-
-        const kB = Object.keys(mapB).sort();
-        if (kB.length >= 2) {
-          const el = document.getElementById("motivasiBulanan");
-          el.style.display = "block";
-          if (mapB[kB.at(-1)] > mapB[kB.at(-2)]) {
-            el.className = "motivasi sukses";
-            el.innerHTML =
-              "🏆 Bulan ini lebih baik dari bulan lalu! Kerja kerasmu terbukti 👏";
-          } else {
-            el.className = "motivasi warning";
-            el.innerHTML =
-              "⚠️ Pendapatan bulanan menurun. Tetapkan target baru 🚀";
-          }
-        }
-      }
-
+      // Download PDF (hanya tabel + total)
       async function downloadPDF() {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
-        const canvas = await html2canvas(document.getElementById("areaPDF"), {
-          scale: 2,
-        });
+
+        // Ambil tabel
+        const table = document.querySelector("table").cloneNode(true);
+
+        const tempDiv = document.createElement("div");
+        tempDiv.style.background = "#fff";
+        tempDiv.style.padding = "10px";
+        tempDiv.appendChild(table);
+        document.body.appendChild(tempDiv);
+
+        const canvas = await html2canvas(tempDiv, { scale: 2 });
         const img = canvas.toDataURL("image/png");
-        const w = 210,
-          h = (canvas.height * w) / canvas.width;
+
+        const w = 210;
+        const h = (canvas.height * w) / canvas.width;
         pdf.addImage(img, "PNG", 0, 0, w, h);
-        pdf.save("Laporan_Kerja_Borongan.pdf");
+        pdf.save("Laporan_Borongan_Tabel.pdf");
+
+        document.body.removeChild(tempDiv);
       }
 
       render();
