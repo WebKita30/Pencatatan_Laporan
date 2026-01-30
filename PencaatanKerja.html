@@ -9,18 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
         font-family:
           Segoe UI,
           sans-serif;
         background: #f4f6f8;
-        padding: 15px;
+        padding: 12px;
       }
       .container {
-        max-width: 1000px;
+        max-width: 1100px;
         margin: auto;
         background: #fff;
-        padding: 20px;
+        padding: 16px;
         border-radius: 14px;
       }
       h1 {
@@ -29,7 +32,7 @@
       }
       .form {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: repeat(3, 1fr);
         gap: 10px;
       }
       .form select,
@@ -43,20 +46,19 @@
         background: #1e3c72;
         color: #fff;
         font-weight: bold;
+        cursor: pointer;
       }
-
-      /* Tabel responsif dengan scroll vertikal */
       .table-wrapper {
-        max-height: 400px; /* tinggi maksimum untuk scroll */
-        overflow-y: auto;
-        overflow-x: auto;
-        margin-top: 20px;
+        max-height: 400px;
+        overflow: auto;
+        margin-top: 15px;
         border: 1px solid #ccc;
         border-radius: 10px;
       }
       table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 520px;
       }
       thead th {
         position: sticky;
@@ -65,13 +67,12 @@
         color: #fff;
         padding: 8px;
         font-size: 13px;
-        z-index: 1;
       }
       td {
         padding: 6px;
         font-size: 12px;
-        border-bottom: 1px solid #eee;
         text-align: center;
+        border-bottom: 1px solid #eee;
       }
       .tanggal-row {
         background: #eef3ff;
@@ -86,8 +87,6 @@
         display: none;
         background: #e9f7ef;
         font-weight: bold;
-        position: sticky;
-        bottom: 0;
       }
       .btn-del {
         background: #e74c3c;
@@ -95,14 +94,16 @@
         border: none;
         padding: 4px 8px;
         border-radius: 6px;
+        cursor: pointer;
       }
       .btn {
-        margin-top: 12px;
-        padding: 14px;
         width: 100%;
+        padding: 14px;
+        margin-top: 12px;
         border: none;
         border-radius: 12px;
         font-weight: bold;
+        cursor: pointer;
       }
       .btn-total {
         background: #0c7c59;
@@ -113,11 +114,20 @@
         color: #fff;
       }
 
-      /* PDF */
+      @media (max-width: 900px) {
+        .form {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .form {
+          grid-template-columns: 1fr;
+        }
+      }
+
       #pdfArea {
         position: absolute;
         left: -9999px;
-        top: 0;
         width: 800px;
         background: #fff;
         padding: 20px;
@@ -131,10 +141,6 @@
         border: 1px solid #000;
         padding: 6px;
         font-size: 12px;
-      }
-      #pdfArea tfoot td {
-        font-weight: bold;
-        background: #f0f0f0;
       }
     </style>
   </head>
@@ -186,7 +192,7 @@
       </button>
     </div>
 
-    <!-- PDF AREA -->
+    <!-- PDF -->
     <div id="pdfArea">
       <h2 style="text-align: center">LAPORAN KERJA BORONGAN</h2>
       <table>
@@ -241,12 +247,16 @@
       }
 
       function tambah() {
-        if (!ukuran.value || !hasil.value) return alert("Lengkapi data!");
+        if (!ukuran.value || !hasil.value) {
+          alert("Lengkapi data!");
+          return;
+        }
         const harga = Number(
           ukuran.options[ukuran.selectedIndex].dataset.harga,
         );
         const total = harga * hasil.value;
         const tanggal = new Date().toISOString().slice(0, 10);
+
         data.push({
           tanggal,
           ukuran: ukuran.value,
@@ -275,6 +285,7 @@
           if (!group[d.tanggal]) group[d.tanggal] = [];
           group[d.tanggal].push(d);
         });
+
         Object.keys(group)
           .sort()
           .forEach((tgl) => {
@@ -282,62 +293,69 @@
             tabel.innerHTML += `<tr class="tanggal-row"><td colspan="5">${hariTanggal(tgl)}</td></tr>`;
             group[tgl].forEach((d) => {
               totalH += d.total;
-              tabel.innerHTML += `<tr>
-<td>${d.ukuran}</td>
-<td>${rupiah(d.harga)}</td>
-<td>${d.hasil}</td>
-<td>${rupiah(d.total)}</td>
-<td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
-</tr>`;
+              tabel.innerHTML += `
+      <tr>
+        <td>${d.ukuran}</td>
+        <td>${rupiah(d.harga)}</td>
+        <td>${d.hasil}</td>
+        <td>${rupiah(d.total)}</td>
+        <td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
+      </tr>`;
             });
-            tabel.innerHTML += `<tr class="total-harian">
-<td colspan="3">TOTAL PER HARI</td>
-<td>${rupiah(totalH)}</td>
-<td></td>
-</tr>`;
+            tabel.innerHTML += `
+    <tr class="total-harian">
+      <td colspan="3">TOTAL PER HARI</td>
+      <td>${rupiah(totalH)}</td>
+      <td></td>
+    </tr>`;
           });
       }
 
       function hitungTotalKeseluruhan() {
-        let total = data.reduce((acc, d) => acc + d.total, 0);
+        let total = data.reduce((a, b) => a + b.total, 0);
         totalKeseluruhan.innerText = rupiah(total);
         tfootTotal.style.display = "table-footer-group";
       }
 
       async function downloadPDF() {
-        if (!data.length) return alert("Data kosong!");
+        if (!data.length) {
+          alert("Data kosong!");
+          return;
+        }
         pdfTabel.innerHTML = "";
-        let grandTotal = 0;
+        let grand = 0;
         const group = {};
+
         data.forEach((d) => {
           if (!group[d.tanggal]) group[d.tanggal] = [];
           group[d.tanggal].push(d);
         });
+
         Object.keys(group)
           .sort()
           .forEach((tgl) => {
-            let totalH = 0;
+            let harian = 0;
             pdfTabel.innerHTML += `<tr><td colspan="4"><b>${hariTanggal(tgl)}</b></td></tr>`;
             group[tgl].forEach((d) => {
-              totalH += d.total;
-              grandTotal += d.total;
-              pdfTabel.innerHTML += `<tr>
-<td>${d.ukuran}</td>
-<td>${rupiah(d.harga)}</td>
-<td>${d.hasil}</td>
-<td>${rupiah(d.total)}</td>
-</tr>`;
+              harian += d.total;
+              grand += d.total;
+              pdfTabel.innerHTML += `
+      <tr>
+        <td>${d.ukuran}</td>
+        <td>${rupiah(d.harga)}</td>
+        <td>${d.hasil}</td>
+        <td>${rupiah(d.total)}</td>
+      </tr>`;
             });
-            pdfTabel.innerHTML += `<tr>
-<td colspan="3"><b>TOTAL PER HARI</b></td>
-<td><b>${rupiah(totalH)}</b></td>
-</tr>`;
+            pdfTabel.innerHTML += `
+    <tr>
+      <td colspan="3"><b>TOTAL PER HARI</b></td>
+      <td><b>${rupiah(harian)}</b></td>
+    </tr>`;
           });
-        pdfTabel.innerHTML += `<tr>
-<td colspan="3"><b>TOTAL KESELURUHAN</b></td>
-<td><b>${rupiah(grandTotal)}</b></td>
-</tr>`;
-        pdfTotal.innerText = rupiah(grandTotal);
+
+        pdfTotal.innerText = rupiah(grand);
+
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
         const canvas = await html2canvas(pdfArea, { scale: 2 });
