@@ -27,7 +27,6 @@
         text-align: center;
         color: #1e3c72;
       }
-
       .form {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
@@ -46,16 +45,27 @@
         font-weight: bold;
       }
 
+      /* Tabel responsif dengan scroll vertikal */
+      .table-wrapper {
+        max-height: 400px; /* tinggi maksimum untuk scroll */
+        overflow-y: auto;
+        overflow-x: auto;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
       }
-      th {
+      thead th {
+        position: sticky;
+        top: 0;
         background: #1e3c72;
         color: #fff;
         padding: 8px;
         font-size: 13px;
+        z-index: 1;
       }
       td {
         padding: 6px;
@@ -72,13 +82,13 @@
         background: #fafafa;
         font-weight: bold;
       }
-
       tfoot {
         display: none;
         background: #e9f7ef;
         font-weight: bold;
+        position: sticky;
+        bottom: 0;
       }
-
       .btn-del {
         background: #e74c3c;
         color: #fff;
@@ -146,25 +156,27 @@
         <button onclick="tambah()">Tambah</button>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Ukuran</th>
-            <th>Harga</th>
-            <th>Jumlah</th>
-            <th>Total</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tabel"></tbody>
-        <tfoot id="tfootTotal">
-          <tr>
-            <td colspan="3">TOTAL KESELURUHAN</td>
-            <td id="totalKeseluruhan">Rp 0</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Ukuran</th>
+              <th>Harga</th>
+              <th>Jumlah</th>
+              <th>Total</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tabel"></tbody>
+          <tfoot id="tfootTotal">
+            <tr>
+              <td colspan="3">TOTAL KESELURUHAN</td>
+              <td id="totalKeseluruhan">Rp 0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
       <button class="btn btn-total" onclick="hitungTotalKeseluruhan()">
         🧮 TOTALKAN KESELURUHAN
@@ -263,7 +275,6 @@
           if (!group[d.tanggal]) group[d.tanggal] = [];
           group[d.tanggal].push(d);
         });
-
         Object.keys(group)
           .sort()
           .forEach((tgl) => {
@@ -271,8 +282,7 @@
             tabel.innerHTML += `<tr class="tanggal-row"><td colspan="5">${hariTanggal(tgl)}</td></tr>`;
             group[tgl].forEach((d) => {
               totalH += d.total;
-              tabel.innerHTML += `
-<tr>
+              tabel.innerHTML += `<tr>
 <td>${d.ukuran}</td>
 <td>${rupiah(d.harga)}</td>
 <td>${d.hasil}</td>
@@ -280,8 +290,7 @@
 <td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
 </tr>`;
             });
-            tabel.innerHTML += `
-<tr class="total-harian">
+            tabel.innerHTML += `<tr class="total-harian">
 <td colspan="3">TOTAL PER HARI</td>
 <td>${rupiah(totalH)}</td>
 <td></td>
@@ -290,8 +299,7 @@
       }
 
       function hitungTotalKeseluruhan() {
-        let total = 0;
-        data.forEach((d) => (total += d.total));
+        let total = data.reduce((acc, d) => acc + d.total, 0);
         totalKeseluruhan.innerText = rupiah(total);
         tfootTotal.style.display = "table-footer-group";
       }
@@ -301,12 +309,10 @@
         pdfTabel.innerHTML = "";
         let grandTotal = 0;
         const group = {};
-
         data.forEach((d) => {
           if (!group[d.tanggal]) group[d.tanggal] = [];
           group[d.tanggal].push(d);
         });
-
         Object.keys(group)
           .sort()
           .forEach((tgl) => {
@@ -315,23 +321,23 @@
             group[tgl].forEach((d) => {
               totalH += d.total;
               grandTotal += d.total;
-              pdfTabel.innerHTML += `
-<tr>
+              pdfTabel.innerHTML += `<tr>
 <td>${d.ukuran}</td>
 <td>${rupiah(d.harga)}</td>
 <td>${d.hasil}</td>
 <td>${rupiah(d.total)}</td>
 </tr>`;
             });
-            pdfTabel.innerHTML += `
-<tr>
+            pdfTabel.innerHTML += `<tr>
 <td colspan="3"><b>TOTAL PER HARI</b></td>
 <td><b>${rupiah(totalH)}</b></td>
 </tr>`;
           });
-
+        pdfTabel.innerHTML += `<tr>
+<td colspan="3"><b>TOTAL KESELURUHAN</b></td>
+<td><b>${rupiah(grandTotal)}</b></td>
+</tr>`;
         pdfTotal.innerText = rupiah(grandTotal);
-
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
         const canvas = await html2canvas(pdfArea, { scale: 2 });
