@@ -32,11 +32,11 @@
       }
       .form {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 10px;
       }
-      .form select,
       .form input,
+      .form select,
       .form button {
         padding: 12px;
         border-radius: 10px;
@@ -113,6 +113,10 @@
         background: #34495e;
         color: #fff;
       }
+      .btn-hapus {
+        background: #c0392b;
+        color: #fff;
+      }
 
       @media (max-width: 900px) {
         .form {
@@ -132,10 +136,6 @@
         background: #fff;
         padding: 20px;
       }
-      #pdfArea table {
-        width: 100%;
-        border-collapse: collapse;
-      }
       #pdfArea th,
       #pdfArea td {
         border: 1px solid #000;
@@ -147,9 +147,10 @@
 
   <body>
     <div class="container">
-      <h1>📊 Dashboard Kerja Borongan Arief</h1>
+      <h1>📊 Dashboard Kerja Borongan</h1>
 
       <div class="form">
+        <input type="date" id="tanggal" />
         <select id="ukuran">
           <option value="">Pilih Ukuran</option>
           <option data-harga="10.5">45–54 cm</option>
@@ -187,12 +188,17 @@
       <button class="btn btn-total" onclick="hitungTotalKeseluruhan()">
         🧮 TOTALKAN KESELURUHAN
       </button>
+
+      <button class="btn btn-hapus" onclick="hapusSemua()">
+        🗑️ HAPUS SEMUA DATA
+      </button>
+
       <button class="btn btn-pdf" onclick="downloadPDF()">
         📥 DOWNLOAD PDF
       </button>
     </div>
 
-    <!-- PDF -->
+    <!-- PDF AREA -->
     <div id="pdfArea">
       <h2 style="text-align: center">LAPORAN KERJA BORONGAN</h2>
       <table>
@@ -217,6 +223,10 @@
     <script>
       let data = JSON.parse(localStorage.getItem("borongan")) || [];
       const rupiah = (n) => "Rp " + Number(n).toLocaleString("id-ID");
+
+      document.getElementById("tanggal").value = new Date()
+        .toISOString()
+        .slice(0, 10);
 
       function hariTanggal(t) {
         const h = [
@@ -251,19 +261,22 @@
           alert("Lengkapi data!");
           return;
         }
+
         const harga = Number(
           ukuran.options[ukuran.selectedIndex].dataset.harga,
         );
+        const tanggalInput =
+          tanggal.value || new Date().toISOString().slice(0, 10);
         const total = harga * hasil.value;
-        const tanggal = new Date().toISOString().slice(0, 10);
 
         data.push({
-          tanggal,
+          tanggal: tanggalInput,
           ukuran: ukuran.value,
           harga,
           hasil: +hasil.value,
           total,
         });
+
         localStorage.setItem("borongan", JSON.stringify(data));
         ukuran.value = "";
         hasil.value = "";
@@ -274,8 +287,17 @@
       function hapus(i) {
         data.splice(i, 1);
         localStorage.setItem("borongan", JSON.stringify(data));
-        tfootTotal.style.display = "none";
         render();
+      }
+
+      function hapusSemua() {
+        if (!data.length) return alert("Data sudah kosong!");
+        if (confirm("Yakin ingin menghapus SEMUA data?")) {
+          data = [];
+          localStorage.removeItem("borongan");
+          tabel.innerHTML = "";
+          tfootTotal.style.display = "none";
+        }
       }
 
       function render() {
@@ -294,34 +316,33 @@
             group[tgl].forEach((d) => {
               totalH += d.total;
               tabel.innerHTML += `
-      <tr>
-        <td>${d.ukuran}</td>
-        <td>${rupiah(d.harga)}</td>
-        <td>${d.hasil}</td>
-        <td>${rupiah(d.total)}</td>
-        <td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
-      </tr>`;
+              <tr>
+                <td>${d.ukuran}</td>
+                <td>${rupiah(d.harga)}</td>
+                <td>${d.hasil}</td>
+                <td>${rupiah(d.total)}</td>
+                <td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
+              </tr>`;
             });
             tabel.innerHTML += `
-    <tr class="total-harian">
-      <td colspan="3">TOTAL PER HARI</td>
-      <td>${rupiah(totalH)}</td>
-      <td></td>
-    </tr>`;
+            <tr class="total-harian">
+              <td colspan="3">TOTAL PER HARI</td>
+              <td>${rupiah(totalH)}</td>
+              <td></td>
+            </tr>`;
           });
       }
 
       function hitungTotalKeseluruhan() {
-        let total = data.reduce((a, b) => a + b.total, 0);
-        totalKeseluruhan.innerText = rupiah(total);
+        totalKeseluruhan.innerText = rupiah(
+          data.reduce((a, b) => a + b.total, 0),
+        );
         tfootTotal.style.display = "table-footer-group";
       }
 
       async function downloadPDF() {
-        if (!data.length) {
-          alert("Data kosong!");
-          return;
-        }
+        if (!data.length) return alert("Data kosong!");
+
         pdfTabel.innerHTML = "";
         let grand = 0;
         const group = {};
@@ -340,24 +361,24 @@
               harian += d.total;
               grand += d.total;
               pdfTabel.innerHTML += `
-      <tr>
-        <td>${d.ukuran}</td>
-        <td>${rupiah(d.harga)}</td>
-        <td>${d.hasil}</td>
-        <td>${rupiah(d.total)}</td>
-      </tr>`;
+              <tr>
+                <td>${d.ukuran}</td>
+                <td>${rupiah(d.harga)}</td>
+                <td>${d.hasil}</td>
+                <td>${rupiah(d.total)}</td>
+              </tr>`;
             });
             pdfTabel.innerHTML += `
-    <tr>
-      <td colspan="3"><b>TOTAL PER HARI</b></td>
-      <td><b>${rupiah(harian)}</b></td>
-    </tr>`;
+            <tr>
+              <td colspan="3"><b>TOTAL PER HARI</b></td>
+              <td><b>${rupiah(harian)}</b></td>
+            </tr>`;
           });
 
         pdfTotal.innerText = rupiah(grand);
 
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF("p", "mm", "a4");
+        const pdf = new jsPDF();
         const canvas = await html2canvas(pdfArea, { scale: 2 });
         const imgWidth = 190;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
