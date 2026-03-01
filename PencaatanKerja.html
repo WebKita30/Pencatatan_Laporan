@@ -11,115 +11,152 @@
     <style>
       * {
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
+
       body {
-        font-family:
-          Segoe UI,
-          sans-serif;
-        background: #f4f6f8;
+        margin: 0;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #f2f4f7;
         padding: 12px;
       }
+
       .container {
-        max-width: 1100px;
+        max-width: 420px;
         margin: auto;
-        background: #fff;
+        background: #ffffff;
         padding: 16px;
-        border-radius: 14px;
+        border-radius: 18px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
       }
+
       h1 {
+        margin: 0 0 16px;
         text-align: center;
+        font-size: 20px;
+        font-weight: 700;
         color: #1e3c72;
       }
 
+      /* ===== FORM ===== */
       .form {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 14px;
       }
+
       .form input,
-      .form select,
-      .form button {
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid #ccc;
+      .form select {
+        width: 100%;
+        padding: 14px 14px;
+        border-radius: 14px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        font-size: 14px;
       }
+
       .form button {
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        font-size: 15px;
+        font-weight: 700;
         background: #1e3c72;
         color: #fff;
-        font-weight: bold;
         cursor: pointer;
       }
 
+      /* ===== TABLE ===== */
       .table-wrapper {
-        max-height: 400px;
-        overflow: auto;
-        margin-top: 15px;
-        border: 1px solid #ccc;
-        border-radius: 10px;
+        margin-top: 10px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        background: #fff;
       }
+
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 520px;
+        font-size: 13px;
       }
+
       thead th {
-        background: #1e3c72;
+        background: #1f3b6d;
         color: #fff;
-        padding: 8px;
-        position: sticky;
-        top: 0;
+        padding: 10px 6px;
+        font-weight: 600;
       }
+
       td {
-        padding: 6px;
-        font-size: 12px;
+        padding: 10px 6px;
         text-align: center;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid #eef0f3;
       }
-      .tanggal-row {
+
+      /* ===== SPECIAL ROWS ===== */
+      .tanggal-row td {
         background: #eef3ff;
-        font-weight: bold;
-        text-align: left;
+        font-weight: 600;
+        text-align: center;
+        padding: 10px;
       }
-      .total-harian {
-        background: #fafafa;
-        font-weight: bold;
+
+      .total-harian td {
+        background: #f8fafc;
+        font-weight: 700;
       }
+
       tfoot {
         display: none;
         background: #e9f7ef;
         font-weight: bold;
       }
 
+      /* ===== BUTTONS ===== */
+      .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
       .btn {
         width: 100%;
-        padding: 14px;
-        margin-top: 12px;
+        padding: 15px;
+        border-radius: 16px;
         border: none;
-        border-radius: 12px;
-        font-weight: bold;
+        font-size: 15px;
+        font-weight: 700;
         cursor: pointer;
       }
+
       .btn-total {
-        background: #0c7c59;
+        background: #0f7a54;
         color: #fff;
       }
-      .btn-pdf {
-        background: #34495e;
-        color: #fff;
-      }
+
       .btn-hapus {
         background: #c0392b;
         color: #fff;
       }
+
+      .btn-pdf {
+        background: #34495e;
+        color: #fff;
+      }
+
       .btn-del {
         background: #e74c3c;
         color: #fff;
         border: none;
-        padding: 4px 8px;
-        border-radius: 6px;
-        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 10px;
+        font-size: 12px;
       }
 
+      /* ===== PDF ===== */
       #pdfArea {
         position: absolute;
         left: -9999px;
@@ -127,15 +164,27 @@
         background: #fff;
         padding: 20px;
       }
+
       #pdfArea table {
         width: 100%;
         border-collapse: collapse;
       }
+
       #pdfArea th,
       #pdfArea td {
         border: 1px solid #000;
         padding: 6px;
         font-size: 12px;
+      }
+
+      /* ===== DESKTOP ===== */
+      @media (min-width: 768px) {
+        body {
+          padding: 24px;
+        }
+        .container {
+          max-width: 600px;
+        }
       }
     </style>
   </head>
@@ -166,7 +215,7 @@
               <th>Harga</th>
               <th>Jumlah</th>
               <th>Total</th>
-              <th>Aksi</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="tabel"></tbody>
@@ -180,18 +229,20 @@
         </table>
       </div>
 
-      <button class="btn btn-total" onclick="hitungTotalKeseluruhan()">
-        🧮 TOTALKAN KESELURUHAN
-      </button>
-      <button class="btn btn-hapus" onclick="hapusSemua()">
-        🗑️ HAPUS SEMUA
-      </button>
-      <button class="btn btn-pdf" onclick="downloadPDF()">
-        📥 DOWNLOAD PDF
-      </button>
+      <div class="actions">
+        <button class="btn btn-total" onclick="hitungTotalKeseluruhan()">
+          🧮 TOTALKAN KESELURUHAN
+        </button>
+        <button class="btn btn-hapus" onclick="hapusSemua()">
+          🗑️ HAPUS SEMUA DATA
+        </button>
+        <button class="btn btn-pdf" onclick="downloadPDF()">
+          📥 DOWNLOAD PDF
+        </button>
+      </div>
     </div>
 
-    <!-- AREA PDF -->
+    <!-- PDF -->
     <div id="pdfArea">
       <h2 style="text-align: center">LAPORAN KERJA BORONGAN</h2>
       <table>
@@ -297,9 +348,7 @@
         <td><button class="btn-del" onclick="hapus(${data.indexOf(d)})">Hapus</button></td>
       </tr>`;
             });
-            tabel.innerHTML += `<tr class="total-harian">
-      <td colspan="3">TOTAL PER HARI</td>
-      <td>${rupiah(total)}</td><td></td></tr>`;
+            tabel.innerHTML += `<tr class="total-harian"><td colspan="3">TOTAL PER HARI</td><td>${rupiah(total)}</td><td></td></tr>`;
           });
       }
 
@@ -314,22 +363,16 @@
         if (!data.length) return alert("Data kosong!");
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF("p", "mm", "a4");
-
         const group = {};
         data.forEach((d) => {
           if (!group[d.tanggal]) group[d.tanggal] = [];
           group[d.tanggal].push(d);
         });
-
         let first = true;
         for (const tgl of Object.keys(group).sort()) {
           pdfTabel.innerHTML = "";
           let total = 0;
-
-          pdfTabel.innerHTML += `<tr>
-      <td colspan="4" style="font-weight:bold;text-align:center">${hariTanggal(tgl)}</td>
-    </tr>`;
-
+          pdfTabel.innerHTML += `<tr><td colspan="4" style="text-align:center;font-weight:bold">${hariTanggal(tgl)}</td></tr>`;
           group[tgl].forEach((d) => {
             total += d.total;
             pdfTabel.innerHTML += `
@@ -340,21 +383,13 @@
         <td>${rupiah(d.total)}</td>
       </tr>`;
           });
-
-          pdfTabel.innerHTML += `<tr>
-      <td colspan="3"><b>TOTAL PER HARI</b></td>
-      <td><b>${rupiah(total)}</b></td>
-    </tr>`;
-
+          pdfTabel.innerHTML += `<tr><td colspan="3"><b>TOTAL</b></td><td><b>${rupiah(total)}</b></td></tr>`;
           const canvas = await html2canvas(pdfArea, { scale: 2 });
-          const w = 190;
-          const h = (canvas.height * w) / canvas.width;
           if (!first) pdf.addPage();
           first = false;
-          pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, w, h);
+          pdf.addImage(canvas.toDataURL("image/png"), "PNG", 10, 10, 190, 0);
         }
-
-        pdf.save("Laporan_Borongan_Per_Hari.pdf");
+        pdf.save("Laporan_Borongan.pdf");
       }
 
       render();
